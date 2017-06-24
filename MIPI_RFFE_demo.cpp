@@ -4,6 +4,7 @@
 // Description: This demonstration/starting application utilizes one DPS12 board
 //              to simulate a 4 site program with a certain percentage of failures
 //              over 4 test functions.
+// add description
 // 
 // Copyright (c) 2011 Test Evolution Inc.
 // All Rights Reserved
