@@ -1,0 +1,88 @@
+// type in Salck Channel: /wiki poweron
+
+TEST_FUNCT int PowerOn(int testNumber)
+{
+	
+	char str[128];
+
+	sprintf_s(str, "PowerOn : %4d : %4d", testNumber);
+	TevUtil_TraceMessage(str); 
+
+	double expectedVoltages[4];
+
+   	MLOG_CheckFastBinning
+
+	UINT passMask = 0xFFFF; // 1 bit per site
+ 
+	TevVI_SetVoltage  ("ALL_VI",  0, 1 A ,  5 V, 1 A,  -1 A);	
+	TevVI_ConnectDUT  ("ALL_VI", TEVVI_VAL_REMOTE_SENSE);
+	TevVI_Gate        ("ALL_VI", TEVVI_VAL_ON);
+		
+
+	TevVI_ForceVoltage("VI_1P2_SUPPLY", 1.2 V, 5.0);
+	TevWait_Now(10 ms);
+	TevVI_ForceVoltage("VI_1P8_SUPPLY", 1.8 V, 5.0);
+	TevWait_Now(10 ms);
+	TevVI_ForceVoltage("VI_3P3_SUPPLY", 3.3 V, 5.0);
+	TevWait_Now(10 ms);
+
+	// *** Must set an active pattern before *any* DD192 commands ***
+	DD.SetActivePattern(0); 
+
+	TevDD_DriverMode("ALL_PINS", "DriveSense");
+	TevDD_StaticDrive ("ALL_PINS", "0");
+	TevDD_DataMode ("ALL_PINS", "Dynamic");
+	TevDD_Connect("ALL_PINS", "DUT");
+
+
+	TevWait_Now(100 ms);
+	MLog_Header (testNumber, "Power Up PMU", "");
+	expectedVoltages[0] = 1.2; //VDD1p2
+	expectedVoltages[1] = 1.8; //VDD1p8
+	expectedVoltages[2] = 3.3; //VDD3p3
+	expectedVoltages[3] = 3.3; //VBatt
+
+	double minLimitV = 0;
+	double maxLimitV = 0;
+
+	int channels = TevTester_NumberOfPins("ALL_VI");	// Per site!
+	double results_V[4*MAX_SITES]; 
+	double results_I[4*MAX_SITES];
+	double minLimitI = -100 mA;
+	double maxLimitI = 500 mA;
+
+	
+	TevVI_MeasureCurrent("ALL_VI" , results_I, sizeof (results_I));
+	TevVI_MeasureVoltage("ALL_VI" , results_V, sizeof (results_V));
+	
+	if (gSimulator)
+	{
+		int i = 0;
+		for (int v = 0; v < 4; v ++)
+		{
+			MLOG_ForEachEnabledSite(siteIndex)
+			{
+				results_V[i] = GetRandomResult(expectedVoltages[v]- 100 mV,expectedVoltages[v] + 100 mV);
+				results_I[i++] = GetRandomResult(minLimitI, maxLimitI);
+			}
+		}
+		
+	}
+	
+	for (int subTestIndex = 0; subTestIndex < channels; subTestIndex++)
+	{
+		char pinName[128];
+		double channelResults[2];
+		strcpy_s(pinName, TevTester_GetPinName("ALL_VI",subTestIndex));
+		minLimitV = expectedVoltages[subTestIndex] - 100 mV;
+		maxLimitV = expectedVoltages[subTestIndex] + 100 mV;
+		MLOG_ForEachEnabledSite(siteIndex)
+			channelResults[siteIndex] = MVP_GetResult("ALL_VI",results_V, siteIndex, subTestIndex);
+		passMask  &= MLog_Datalog  (pinName, AUTONUM, "VOLTAGE", channelResults, "V", minLimitV, maxLimitV, "", "Bin2");
+	}
+	passMask  &= MLog_Datalog  ("ALL_VI", AUTONUM, "CURRENT", results_I, "mA", minLimitI, maxLimitI, "", "Bin2");
+	
+	MLOG_DisableFailedSites
+
+    return MLOG_SITES_PASS(passMask);
+}
