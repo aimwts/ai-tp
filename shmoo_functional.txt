@@ -1,0 +1,55 @@
+TEST_FUNCT int ShmooFunctionalPattern(void)
+{
+   	MLOG_CheckFastBinning
+
+	bool RunPat=false;
+	char str[1024];
+	int testNumber;
+
+	int patternIndex = DD.GetPatternIndex("FUNCTIONAL.DO");
+
+	sprintf_s(str, "Shmoo : %12s : %d", DD.GetPatternName(patternIndex), patternIndex);
+	TevUtil_TraceMessage(str); 
+   
+
+	if (! DD.IsPatternLoaded(patternIndex))
+	{
+			sprintf_s(str, "Shmoo : %12s Pattern Not Loaded Shmoo Aborted", DD.GetPatternName(patternIndex));
+			TevUtil_TraceMessage(str); 
+			return 0;
+	}
+		
+	DD.SetActivePattern(patternIndex);
+	
+	int apiErr = 0;
+			
+	apiErr |= TevDD_HramSetup("StoreFirst", "StoreVectors", "StoreFailures", "FailContinue");
+	apiErr |= TevDD_HramTrigger("TriggerCycle", 0);
+	
+	//DD.DisableFailMask(patternIndex);
+	apiErr |= TevDD_FailMask ("ALL_PINS","Enabled");
+	apiErr |= TevDD_FailMask ("GPIO_8","Disabled");
+	
+	DD.Run(patternIndex, "START");
+
+	double period = 10; //ns
+	TevShmoo_SetTitle("GPIO_8 Data Eye");
+	TevShmoo_SetAxisLabel(SHMOO_X_AXIS, "EDGE_FUNC_2A Strobe (ns)");
+	TevShmoo_SetAxisLabel(SHMOO_Y_AXIS, "GPIO_8 VOH (V)");
+	TevShmoo_SetStartValue(SHMOO_X_AXIS, 0.0);
+	TevShmoo_SetStopValue(SHMOO_X_AXIS, period ); // ns
+	TevShmoo_SetNumberOfSteps(SHMOO_X_AXIS, 25);
+	TevShmoo_SetStartValue(SHMOO_Y_AXIS, 0.0);
+	TevShmoo_SetStopValue(SHMOO_Y_AXIS, 1.8 );
+	TevShmoo_SetNumberOfSteps(SHMOO_Y_AXIS, 25	);
+	TevShmoo_SetTestCallback(ShmooStrobeLevel);
+	TevShmoo_Display(); 
+
+    // Set things back up to original state
+	TevDD_EdgeSetModify ("EDGE_FUNC_2A","Strobe",0 ns,0.75*FUNC_PERIOD_2);
+	TevDD_SetLevel ("GPIO_8","VOH", 0.9);   
+	TevDD_SetLevel ("GPIO_8","VOL", 0.9);
+	
+	
+    return 1;
+}
