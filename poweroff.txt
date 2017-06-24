@@ -1,0 +1,14 @@
+TEST_FUNCT void ApplicationEnd(void)
+{
+
+	// POWER OFF Device
+	TevDD_DriverMode("ALL_PINS", "DriveSense");
+	TevDD_StaticDrive ("ALL_PINS", "Z");
+	TevDD_DataMode ("ALL_PINS", "Dynamic");
+	TevDD_Disconnect("ALL_PINS");
+	TevVI_ForceVoltage("VI_1P8_SUPPLY", 1.8 V, 5.0);
+	TevVI_ForceVoltage("VI_1P2_SUPPLY", 1.2 V, 5.0);
+	TevVI_SetVoltage("ALL_VI",  0, 25 mA ,  5 V, 25 mA,  -25 mA);	
+	TevVI_Gate        ("ALL_VI", TEVVI_VAL_OFF);
+	TevVI_Disconnect  ("ALL_VI");	
+}
