@@ -1,0 +1,33 @@
+#define SHMOO
+#ifdef SHMOO
+
+
+#define FUNC_PERIOD_2 10 ns
+
+int ShmooStrobeLevel(int xstepIndex, int yStepIndex, double xStep, double yStep, double* result)
+{
+
+	int pass = 1;
+
+	int patternIndex = DD.GetPatternIndex("FUNCTIONAL.DO");
+
+	//xStep = xStep/100  * FUNC_PERIOD_2; 
+	xStep = xStep * 1 ns; 
+
+	TevDD_EdgeSetModify ("EDGE_FUNC_2A","Strobe",0.0,xStep);
+	TevDD_SetLevel ("GPIO_8","VOH", yStep);   
+	TevDD_SetLevel ("GPIO_8","VOL", yStep);   
+	DD.Run(patternIndex, "START");
+
+    int numFails = DD.GetVectorFails(1);
+
+    if (numFails)
+		pass = 0;
+	else
+		pass = 1;
+
+	*result = numFails;
+
+	return pass;
+
+}
