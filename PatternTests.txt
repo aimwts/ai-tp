@@ -1,0 +1,68 @@
+TEST_FUNCT int PatternTests( int startingTestNumber, int testNumberIncrement)
+{
+   	MLOG_CheckFastBinning
+
+	bool RunPat=false;
+	char str[1024];
+	int testNumber;
+
+	UINT passMask = 0xFFFF; // 1 bit per site
+
+	for (int patternIndex = 0; patternIndex < DD.GetNumPatterns(); patternIndex++)
+	{
+	     testNumber = startingTestNumber + patternIndex * testNumberIncrement;
+
+		sprintf_s(str, "PatternTest : %4d %12s : %d", testNumber, DD.GetPatternName(patternIndex), patternIndex);
+		TevUtil_TraceMessage(str); 
+   
+
+		if (! DD.IsPatternLoaded(patternIndex))
+		{
+				char buffer[200];
+				double results[MAX_SITES] = {0.0};
+				sprintf_s(buffer, "%s Pattern Tests",DD.GetPatternName(patternIndex));
+				int subTestNumber = 1;
+				MLog_Header (testNumber, buffer, "");
+				MLog_LogState( DD.GetPatternName(patternIndex), 1, "Pattern Not Loaded", results, "", "Pattern Skipped", "Bin3");
+				continue;
+		}
+		
+		DD.SetActivePattern(patternIndex);
+	
+		int apiErr = 0;
+			
+		apiErr |= TevDD_HramSetup("StoreFirst", "StoreVectors", "StoreFailures", "FailContinue");
+		apiErr |= TevDD_HramTrigger("TriggerCycle", 0);
+	
+		if (strcmp(DD.GetPatternName(patternIndex),"JTAG.DO") == 0) 
+		{
+			DD.ConnectPatternTrigger("DD_DStar_A", "PFI0", FALSE);
+			DD.ConnectPinTrigger("GPIO_6","DD_DStar_B","PFI1",FALSE);
+			DD.ConnectPinTrigger("GPIO_4","DD_DStar_C","PFI2",FALSE);
+			DD.ConnectPinTrigger("GPIO_0","DD_DStar_D","PFI3",FALSE);
+		}
+	
+	
+		DD.DisableFailMask(patternIndex);
+	
+		DD.Run(patternIndex, "START");
+
+		passMask &= DD.Log(testNumber+1, patternIndex, "Bin3");
+		passMask &=	DD.LogPinFailures(testNumber+2, patternIndex, "Bin3", false);
+				
+	}
+
+	TevDD_TriggerDisableAll();
+	DD.DisconnectPatternTrigger("DD_DStar_A", "PFI0");
+	DD.DisconnectPinTrigger("DD_DStar_B","PFI1");
+	DD.DisconnectPinTrigger("DD_DStar_C", "PFI2");
+	DD.DisconnectPinTrigger("DD_DStar_D", "PFI3");
+		
+	TevTrigger_DisconnectAllTerminals();
+
+	
+
+	MLOG_DisableFailedSites
+		
+    return MLOG_SITES_PASS(passMask);
+}
