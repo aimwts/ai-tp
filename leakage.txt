@@ -1,0 +1,55 @@
+TEST_FUNCT int LeakageTests( int testNumber, int patternIndex)
+{
+	UINT passMask = 0xFFFF; // 1 bit per site
+	char str[256];
+	sprintf(str, "Leakage test : %4d %12s : %d", testNumber, DD.GetPatternName(patternIndex) , patternIndex);
+	TevUtil_TraceMessage(str); 
+
+	if (! DD.IsPatternLoaded(patternIndex))
+	{
+			char buffer[200];
+			double results[MAX_SITES] = {0.0};
+			sprintf(buffer, "%s Pattern Tests", DD.GetPatternName(patternIndex));
+			int subTestNumber = 1;
+			MLog_Header (testNumber, buffer, "");
+			MLog_LogState( DD.GetPatternName(patternIndex), 1, "Pattern Not Loaded", results, "", "Pattern Skipped", "Bin3");
+			return 1;
+	}
+
+	DD.SetActivePattern(patternIndex);
+	double forceV = 0;
+
+	if (strcmp( DD.GetPatternName(patternIndex),"PULL_UP") == 0) 
+		forceV = 1.8;
+
+	unsigned long channels;
+	TevDD_GetNumberPins("Leakage_Pins", &channels);	// Per site!
+	
+	
+	double *mvpResults = new (double[channels*MAX_SITES]);
+	
+	int apiErr = 0;
+	apiErr |= TevDD_DriverMode(DD.GetPatternPins(patternIndex), "DriveSense");
+	apiErr |= TevDD_StaticDrive (DD.GetPatternPins(patternIndex), "Z");
+	apiErr |= TevDD_DataMode (DD.GetPatternPins(patternIndex), "Dynamic");
+	apiErr |= TevDD_Connect(DD.GetPatternPins(patternIndex), "DUT");
+	
+	apiErr |= TevDD_HramSetup("StoreFirst", "StoreVectors", "StoreFailures", "FailContinue");
+	apiErr |= TevDD_HramTrigger("TriggerCycle", 0);
+
+
+	DD.Run(patternIndex, "START");
+
+
+	int err = TevDD_PMUForceV("Leakage_Pins", 3.0, 0.0, "1uA",    forceV);	// 2uA, 20uA, 200uA, 2mA, 32mA: was 2ma
+			
+	// Let the driver measure the group of channels.
+	TevWait_Now(1 ms);
+	err = TevDD_PMUSetMeasure("Leakage_Pins", "MeasureI", 20 us, 5 us, 1, "CaptureDisable");
+		
+	double results[MAX_SITES];
+	err = TevDD_PMUGetMeasure("Leakage_Pins", mvpResults, 1, NULL); 
+	
+	passMask &= MLog_Datalog("Leakage_Pins", 1, "Leakage", mvpResults, "uA", -1e-6, 1e-6, "", "Bin 3");
+	 return passMask;
+}
