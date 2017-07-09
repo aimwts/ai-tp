@@ -1,0 +1,22 @@
+int ShmooScan(int xstepIndex, int yStepIndex, double xStep, double yStep, double* result)
+{
+
+	int pass = 1;
+	xStep = xStep/ 1e9; //ns
+	//yStep = yStep/ 1e9; //ns
+	TevDD_EdgeSetModify ("EDGE_SCAN_XTAL0","RZ",0.0,xStep,70 ns,0.0);
+ 	TevDD_EdgeSetModify ("EDGE_SCAN_CLK","RZ",0.0,xStep,90 ns,0.0);
+	TevVI_ForceVoltage("DVDD12", yStep, 5.0);
+
+	DD.Run(2, "START");
+    int numFails = DD.GetVectorFails(1);
+
+    if (numFails)
+		pass = 0;
+
+	*result = numFails;
+
+	return pass;
+
+}
+
