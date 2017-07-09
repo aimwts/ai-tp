@@ -1,0 +1,21 @@
+
+int ShmooJtag(int xstepIndex, int yStepIndex, double xStep, double yStep, double* result)
+{
+
+	int pass = 1;
+	xStep = xStep/ 1e9; //ns
+	yStep = yStep/ 1e9; //ns
+	TevDD_EdgeSetModify ("EDGE_JTAG_6","RZ",0.0,xStep,85 ns,0.0);
+    TevDD_EdgeSetModify ("EDGE_JTAG","NRZ",0.0,yStep,0.0, 0.0);
+
+	DD.Run(1, "START");
+    int numFails = DD.GetVectorFails(1);
+
+    if (numFails)
+		pass = 0;
+
+	*result = numFails;
+
+	return pass;
+
+}
