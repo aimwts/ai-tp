@@ -1,6 +1,27 @@
-# ai-tp
-Test programs and examples for ai Pingpad and api.ai
-Deposit all test programs and examples here
+![Demo Application Map](https://raw.githubusercontent.com/aimwts/aiTAAS-Edge/master/Taas_logo_s.jpg "Demo Application Map")
+
+# ai-tp is for TAAS members to download or upload your files
+
+TAAS (Test As A Service) is a global Test Expert Knlowledge Network 
+TAAS is Linkedin for Test Engineers
+TAAS is AI-based Smart Test Solutions - ATE Test Development utilizes AI-based development Platform
+
+# Benefits of TAAS 
+
+Space utilization on the test floor - 80%, $ saving
+Changeover time - 80% reduction
+Total Cost of Operation (TCO) - 80%, $ saving
+Open architecture: Support 3rd party vendors
+Capital reduction - 66%
+Tester hourly rate ($ per hour) - 66%
+Training and test program development time reduction over the cloud - 80% 
+Test Cell downtime reduction - 80%
+Defect rates reduction PPM - 80%
+Time to become Test Expert: big iron ATE: > 5 years vs. TAAS: < 1 year
+Device test data analysis: big iron ATE: off line analysis vs. TAAS: AI ML Big Data analysis; Faster and better quality
+
+# Test Programs and examples using Slack, Pingpad and api.ai
+
 Users can use Slack to call api.ai for help on test programs or examples
 Example: in Slack channel: @api.ai help me on leakage test
 Updated: 10/20/2020 Check Dialogflow login ok
