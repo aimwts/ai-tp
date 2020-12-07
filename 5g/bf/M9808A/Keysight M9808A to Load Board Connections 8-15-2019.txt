@@ -1,0 +1,5 @@
+Port 6 to RF1 is connected to 20
+Port 5 to RF2 is connected to 22
+Port 4 to RF3 is connected to 19
+Port 3 to RF4 is connected to 23
+Port 2 to RF Common is connected to 21
