@@ -8,6 +8,10 @@ TAAS is Linkedin for Test Engineers
 
 TAAS is AI-based Smart Test Solutions - ATE Test Development utilizes AI-based development Platform
 
+# to upload your files - select which folder do you want to upload
+
+Example: if you like to upload a test program file then upload to TP folder
+
 
 # Test Programs and examples using Slack, Pingpad and api.ai
 
