@@ -13,7 +13,7 @@ TAAS is AI-based Smart Test Solutions - ATE Test Development utilizes AI-based d
 Example: if you like to upload a test program file then upload to TP folder
 
 
-# Test Programs and examples using Slack, Pingpad and api.ai
+# Test Programs and examples using Slack and Guru
 
 Users can use Slack to call guru.com for help on test programs or examples
 Example: in Slack channel: /guru TP
